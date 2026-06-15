@@ -1,4 +1,15 @@
 {
-  "skills": [],
-  "mcp_servers": []
+  "mcp_servers": [
+    "Ref",
+    "fetch",
+    "seq-thinking",
+    "serena",
+    "todoist"
+  ],
+  "skills": [
+    {
+      "name": "swarm",
+      "path": "skills/swarm"
+    }
+  ]
 }
