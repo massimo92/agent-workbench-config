@@ -7,6 +7,63 @@ The repository ships the tool only. Skills and MCP registries are intentionally
 ignored by git, so users can keep local/private agent configuration without
 publishing it.
 
+## Pain Points
+
+Agent tooling is moving fast, but local configuration still tends to fragment:
+
+- Skills are copied by hand between tools and quickly drift.
+- MCP server definitions use different config formats per app.
+- Private tokens and local paths are easy to leak when configs are committed.
+- It is hard to see which app has a skill or MCP that another app is missing.
+- Codex-only or Claude-only tools can accidentally be treated as shared config.
+- Teams cannot easily keep useful agent workflows portable without publishing
+  personal machine details.
+
+## Who Benefits
+
+`agync` is useful for developers, DevOps engineers, AI power users, and teams
+that run more than one local agent app, especially:
+
+- Codex app users who also use Claude Desktop.
+- Claude Desktop users who want to reuse selected local skills or MCP servers.
+- Engineers standardizing agent setup across laptops.
+- Teams that want a repo for shared agent capabilities without storing secrets.
+- Maintainers who need a clear diff between repo state and app-local state.
+
+It is less useful when all skills and MCPs are specific to one app and should
+never be shared.
+
+## When To Use It
+
+Use `agync` when you want to:
+
+- Audit what each installed agent app has configured.
+- Import reusable skills or MCPs from an app into a local shared repo.
+- Export shared repo config into Codex app, Claude Desktop, or another supported
+  target.
+- Sync only the selected skills and MCPs that are meant to be portable.
+- Keep app-specific tools out of the shared repo.
+
+Run inventory before syncing:
+
+```bash
+agync inventory
+```
+
+Then run import, export, or sync in dry-run mode first. Add `--apply` only after
+the plan looks right.
+
+## Benefits
+
+- One local source of truth for shared agent skills and MCP definitions.
+- Explicit diffs by app, so missing items are visible before changes are made.
+- Dry-run by default, with interactive confirmation in menu mode.
+- Backups before replacing app config or skill folders.
+- Secrets stay local through ignored files and environment placeholders.
+- Public-safe repository layout: the tool can be published without publishing
+  private skills, MCP registries, tokens, or machine-specific paths.
+- Selective sync, so Codex-only and Claude-only capabilities can remain local.
+
 ## Install
 
 ```bash
