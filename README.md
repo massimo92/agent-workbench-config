@@ -13,22 +13,15 @@ Agent tooling is moving fast, but local configuration still tends to fragment:
 
 - Skills are copied by hand between tools and quickly drift.
 - MCP server definitions use different config formats per app.
-- Private tokens and local paths are easy to leak when configs are committed.
 - It is hard to see which app has a skill or MCP that another app is missing.
-- Codex-only or Claude-only tools can accidentally be treated as shared config.
-- Teams cannot easily keep useful agent workflows portable without publishing
-  personal machine details.
 
 ## Who Benefits
 
 `agync` is useful for developers, DevOps engineers, AI power users, and teams
 that run more than one local agent app, especially:
 
-- Codex app users who also use Claude Desktop.
-- Claude Desktop users who want to reuse selected local skills or MCP servers.
+- Users who want to migrate agent apps, e.g. from Codex to Claude or vice versa.
 - Engineers standardizing agent setup across laptops.
-- Teams that want a repo for shared agent capabilities without storing secrets.
-- Maintainers who need a clear diff between repo state and app-local state.
 
 It is less useful when all skills and MCPs are specific to one app and should
 never be shared.
