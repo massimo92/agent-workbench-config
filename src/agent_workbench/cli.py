@@ -33,15 +33,17 @@ MCP_PATH = REPO_ROOT / "mcp" / "shared.json"
 ENV_PATH = Path.home() / ".config" / "agent-workbench" / "env"
 BACKUP_ROOT = Path.home() / ".config" / "agent-workbench" / "backups"
 CODEX_CONFIG = Path.home() / ".codex" / "config.toml"
-CLAUDE_CONFIG = (
+CLAUDE_APP_SUPPORT = (
     Path.home()
     / "Library"
     / "Application Support"
     / "Claude"
-    / "claude_desktop_config.json"
+)
+CLAUDE_CONFIG = CLAUDE_APP_SUPPORT / "claude_desktop_config.json"
+CLAUDE_DESKTOP_SKILLS_PLUGIN_ROOT = (
+    CLAUDE_APP_SUPPORT / "local-agent-mode-sessions" / "skills-plugin"
 )
 CODEX_SKILLS = Path.home() / ".agents" / "skills"
-CLAUDE_SKILLS = Path.home() / ".claude" / "skills"
 OPENCODE_SKILLS = Path.home() / ".config" / "opencode" / "skills"
 OPENCODE_CONFIGS = [
     Path.home() / ".config" / "opencode" / "opencode.json",
@@ -513,10 +515,29 @@ def normalize_app_mcp(value: dict[str, Any]) -> dict[str, Any]:
     return server
 
 
+def claude_desktop_skills_path() -> Path | None:
+    if not CLAUDE_DESKTOP_SKILLS_PLUGIN_ROOT.exists():
+        return None
+    candidates = [
+        path
+        for path in CLAUDE_DESKTOP_SKILLS_PLUGIN_ROOT.glob("*/*/skills")
+        if path.is_dir()
+    ]
+    if not candidates:
+        return None
+    return max(candidates, key=lambda path: path.stat().st_mtime)
+
+
 def detect_targets() -> list[AppTarget]:
     targets = [
         AppTarget("codex", "Codex app", "codex", CODEX_SKILLS, CODEX_CONFIG),
-        AppTarget("claude", "Claude Desktop/Cowork", "claude", CLAUDE_SKILLS, CLAUDE_CONFIG),
+        AppTarget(
+            "claude",
+            "Claude Desktop/Cowork",
+            "claude",
+            claude_desktop_skills_path(),
+            CLAUDE_CONFIG,
+        ),
     ]
     if OPENCODE_SKILLS.exists() or opencode_config_path() is not None:
         targets.append(AppTarget("opencode", "OpenCode", "opencode", OPENCODE_SKILLS, opencode_config_path()))
@@ -770,8 +791,12 @@ def apply_operations(operations: list[Operation], dry_run: bool) -> list[str]:
 
 def install_skills(backup_dir: Path, dry_run: bool) -> list[str]:
     messages = []
+    roots = [CODEX_SKILLS]
+    claude_skills = claude_desktop_skills_path()
+    if claude_skills is not None:
+        roots.append(claude_skills)
     for skill in enabled_skills():
-        for root in (CODEX_SKILLS, CLAUDE_SKILLS):
+        for root in roots:
             messages.append(backup_and_replace_path(root / skill.name, skill.path, backup_dir, dry_run))
     return messages
 
