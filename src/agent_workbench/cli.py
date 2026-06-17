@@ -27,27 +27,65 @@ except ModuleNotFoundError:  # pragma: no cover - doctor reports this after inst
     Table = None
 
 
+def path_from_env(name: str) -> Path | None:
+    value = os.environ.get(name)
+    if not value:
+        return None
+    return Path(value).expanduser()
+
+
+def first_existing_or_default(paths: list[Path]) -> Path:
+    for path in paths:
+        if path.exists():
+            return path
+    return paths[0]
+
+
+def user_config_home() -> Path:
+    override = path_from_env("XDG_CONFIG_HOME")
+    if override is not None:
+        return override
+    if sys.platform == "win32":
+        appdata = path_from_env("APPDATA")
+        if appdata is not None:
+            return appdata
+        return Path.home() / "AppData" / "Roaming"
+    return Path.home() / ".config"
+
+
+def app_support_dir(app_name: str) -> Path:
+    if sys.platform == "darwin":
+        return Path.home() / "Library" / "Application Support" / app_name
+    if sys.platform == "win32":
+        return user_config_home() / app_name
+    return first_existing_or_default(
+        [user_config_home() / app_name, user_config_home() / app_name.lower()]
+    )
+
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 MANIFEST_PATH = REPO_ROOT / "manifest.json"
 MCP_PATH = REPO_ROOT / "mcp" / "shared.json"
-ENV_PATH = Path.home() / ".config" / "agent-workbench" / "env"
-BACKUP_ROOT = Path.home() / ".config" / "agent-workbench" / "backups"
-CODEX_CONFIG = Path.home() / ".codex" / "config.toml"
-CLAUDE_APP_SUPPORT = (
-    Path.home()
-    / "Library"
-    / "Application Support"
-    / "Claude"
+AGYNC_CONFIG_HOME = path_from_env("AGYNC_CONFIG_HOME") or (
+    user_config_home() / "agent-workbench"
 )
+ENV_PATH = AGYNC_CONFIG_HOME / "env"
+BACKUP_ROOT = AGYNC_CONFIG_HOME / "backups"
+CODEX_HOME = path_from_env("CODEX_HOME") or Path.home() / ".codex"
+CODEX_CONFIG = CODEX_HOME / "config.toml"
+CLAUDE_APP_SUPPORT = path_from_env("AGYNC_CLAUDE_HOME") or app_support_dir("Claude")
 CLAUDE_CONFIG = CLAUDE_APP_SUPPORT / "claude_desktop_config.json"
 CLAUDE_DESKTOP_SKILLS_PLUGIN_ROOT = (
     CLAUDE_APP_SUPPORT / "local-agent-mode-sessions" / "skills-plugin"
 )
-CODEX_SKILLS = Path.home() / ".agents" / "skills"
-OPENCODE_SKILLS = Path.home() / ".config" / "opencode" / "skills"
+CODEX_SKILLS = path_from_env("AGYNC_CODEX_SKILLS") or first_existing_or_default(
+    [Path.home() / ".agents" / "skills", CODEX_HOME / "skills"]
+)
+OPENCODE_HOME = path_from_env("AGYNC_OPENCODE_HOME") or user_config_home() / "opencode"
+OPENCODE_SKILLS = OPENCODE_HOME / "skills"
 OPENCODE_CONFIGS = [
-    Path.home() / ".config" / "opencode" / "opencode.json",
-    Path.home() / ".config" / "opencode" / "config.json",
+    OPENCODE_HOME / "opencode.json",
+    OPENCODE_HOME / "config.json",
 ]
 
 SAFE_ENV_KEYS = {"REST_BASE_URL", "HEADER_Accept"}

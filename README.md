@@ -82,6 +82,30 @@ agync sync --all
 By default, import/export/sync are dry-run. Use `--apply` to write changes.
 Interactive mode always shows a plan and asks for confirmation before applying.
 
+## Platform Paths
+
+`agync` detects the current OS and chooses app paths from the platform defaults:
+
+- macOS: Claude Desktop under `~/Library/Application Support/Claude`; local tool
+  data under `~/.config/agent-workbench`.
+- Windows: Claude Desktop and local tool data under `%APPDATA%`.
+- Linux: Claude Desktop under `$XDG_CONFIG_HOME/Claude` or
+  `$XDG_CONFIG_HOME/claude`; local tool data under
+  `$XDG_CONFIG_HOME/agent-workbench`.
+
+Codex config uses `$CODEX_HOME/config.toml` when `CODEX_HOME` is set, otherwise
+`~/.codex/config.toml`. Codex skills default to `~/.agents/skills`, falling back
+to `$CODEX_HOME/skills`.
+
+Override paths when an app stores data somewhere else:
+
+```bash
+AGYNC_CONFIG_HOME=/path/to/agync-data
+AGYNC_CLAUDE_HOME=/path/to/Claude
+AGYNC_CODEX_SKILLS=/path/to/codex/skills
+AGYNC_OPENCODE_HOME=/path/to/opencode
+```
+
 ## Local Data
 
 Ignored local paths:

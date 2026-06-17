@@ -1,6 +1,6 @@
 [project]
 name = "agent-workbench-config"
-version = "0.1.0"
+version = "0.1.1"
 description = "Shared Agent Skills and MCP config for Codex app and Claude Desktop."
 readme = "README.md"
 requires-python = ">=3.10"
